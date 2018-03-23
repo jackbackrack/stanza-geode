@@ -1,0 +1,218 @@
+defpackage geode-circle-arcs :
+  import core
+  import math
+  import collections
+  import geom
+
+deftype g_any <: Geom
+  
+lostanza deftype g_args :
+  kind: int
+  
+public lostanza deftype g-args :
+  value: ptr<g_args>
+  
+lostanza deftype g_v2d :
+  kind : int
+  x : double
+  y : double
+
+public lostanza deftype g-v2d <: g_any :
+  value: ptr<g_v2d>
+  
+lostanza deftype g_array_v2d :
+  kind : int
+
+public lostanza deftype g-array-v2d <: g_any :
+  value: ptr<g_array_v2d>
+
+defmethod print (s:OutputStream, o:g-array-v2d) :
+  print-all(s, ["G-Array-V2d()"])
+
+lostanza deftype g_nested_v2d :
+  kind : int
+
+public lostanza deftype g-nested-v2d <: g_any :
+  value: ptr<g_nested_v2d>
+
+defmethod print (s:OutputStream, o:g-nested-v2d) :
+  print-all(s, ["G-Nested-V2d()"])
+
+lostanza deftype g_array_circle_arc :
+  kind : int
+
+public lostanza deftype g-array-circle-arc <: g_any :
+  value: ptr<g_array_circle_arc>
+
+defmethod print (s:OutputStream, o:g-array-circle-arc) :
+  print-all(s, ["G-Array-Circle-Arc()"])
+
+lostanza deftype g_circle_arc :
+  kind : int
+  x : double
+  y : double
+  q : double
+
+public lostanza deftype g-circle-arc <: g_any :
+  value: ptr<g_circle_arc>
+  
+lostanza deftype g_nested_circle_arc :
+  kind : int
+
+public lostanza deftype g-nested-circle-arc <: g_any :
+  value: ptr<g_nested_circle_arc>
+
+defmethod print (s:OutputStream, o:g-nested-circle-arc) :
+  print-all(s, ["G-Nested-Circle-Arc()"])
+
+extern g_args_fab: () -> ptr<g_args>
+extern g_args_add: (ptr<g_args>, ptr<?>) -> ptr<g_args>
+
+extern g_array_v2d_fab: (ptr<g_args>) -> ptr<g_array_v2d>
+extern g_array_v2d_elt: (ptr<g_array_v2d>, int) -> ptr<g_v2d>
+extern g_array_v2d_len: (ptr<g_array_v2d>) -> int
+
+extern g_nested_v2d_fab: (ptr<g_args>) -> ptr<g_nested_v2d>
+extern g_nested_v2d_elt: (ptr<g_nested_v2d>, int) -> ptr<g_array_v2d>
+extern g_nested_v2d_len: (ptr<g_nested_v2d>) -> int
+
+extern g_circle_arc_fab: (float, float, float) -> ptr<g_circle_arc>
+extern g_array_circle_arc_fab: (ptr<g_args>) -> ptr<g_array_circle_arc>
+extern g_array_circle_arc_elt: (ptr<g_array_circle_arc>, int) -> ptr<g_circle_arc>
+extern g_array_circle_arc_len: (ptr<g_array_circle_arc>) -> int
+
+extern g_nested_circle_arc_fab: (ptr<g_args>) -> ptr<g_nested_circle_arc>
+extern g_nested_circle_arc_elt: (ptr<g_nested_circle_arc>, int) -> ptr<g_array_circle_arc>
+extern g_nested_circle_arc_len: (ptr<g_nested_circle_arc>) -> int
+
+extern g_nested_circle_arc_concat: (ptr<g_nested_circle_arc>, ptr<g_nested_circle_arc>) -> ptr<g_nested_circle_arc>
+extern g_nested_circle_arc_concat_all: (ptr<g_args>) -> ptr<g_nested_circle_arc>
+extern g_nested_circle_arc_find_overlapping_offsets: (float, ptr<g_nested_circle_arc>) -> ptr<g_nested_circle_arc>
+extern g_nested_circle_arc_discretize: (float, int, ptr<g_nested_circle_arc>) -> ptr<g_nested_v2d>
+extern g_nested_circle_arc_open_offset: (ptr<g_nested_circle_arc>, float) -> ptr<g_nested_circle_arc>
+extern g_nested_circle_arc_closed_offset: (ptr<g_nested_circle_arc>, float) -> ptr<g_nested_circle_arc>
+extern g_nested_circle_arc_union: (ptr<g_nested_circle_arc>, ptr<g_nested_circle_arc>) -> ptr<g_nested_circle_arc>
+extern g_nested_circle_arc_intersection: (ptr<g_nested_circle_arc>, ptr<g_nested_circle_arc>) -> ptr<g_nested_circle_arc>
+extern g_nested_circle_arc_intersection1: (ptr<g_nested_circle_arc>) -> ptr<g_nested_circle_arc>
+extern g_nested_circle_arc_difference: (ptr<g_nested_circle_arc>, ptr<g_nested_circle_arc>) -> ptr<g_nested_circle_arc>
+extern g_nested_circle_arc_not: (ptr<g_nested_circle_arc>) -> ptr<g_nested_circle_arc>
+
+public lostanza defn to-v2f (v:ref<g-v2d>) -> ref<V2f> :
+  return new V2f{v.value.x as float, v.value.y as float}
+
+public lostanza defn to-v2f (v:ref<g-circle-arc>) -> ref<V2f> :
+  return new V2f{v.value.x as float, v.value.y as float}
+
+public lostanza defn g-array-v2d-len (a:ref<g-array-v2d>) -> ref<Int> :
+  return new Int{call-c g_array_v2d_len(a.value)}
+
+public lostanza defn g-array-v2d-elt (a:ref<g-array-v2d>, i:ref<Int>) -> ref<g-v2d> :
+  return new g-v2d{call-c g_array_v2d_elt(a.value, i.value)}
+
+public lostanza defn to-g-circle-arc (v:ref<V2f>) -> ref<g-circle-arc> :
+  return new g-circle-arc{call-c g_circle_arc_fab(x(v).value, y(v).value, 0.0f)}
+
+public lostanza defn g-array-circle-arc-len (a:ref<g-array-circle-arc>) -> ref<Int> :
+  return new Int{call-c g_array_circle_arc_len(a.value)}
+
+public lostanza defn g-array-circle-arc-elt (a:ref<g-array-circle-arc>, i:ref<Int>) -> ref<g-circle-arc> :
+  return new g-circle-arc{call-c g_array_circle_arc_elt(a.value, i.value)}
+
+public lostanza defn g-nested-circle-arc-len (a:ref<g-nested-circle-arc>) -> ref<Int> :
+  return new Int{call-c g_nested_circle_arc_len(a.value)}
+
+public lostanza defn g-nested-circle-arc-elt (a:ref<g-nested-circle-arc>, i:ref<Int>) -> ref<g-array-circle-arc> :
+  return new g-array-circle-arc{call-c g_nested_circle_arc_elt(a.value, i.value)}
+
+public lostanza defn to-g-array-circle-arc (v:ref<Tuple<V2f>>) -> ref<g-array-circle-arc> :
+  val args = call-c g_args_fab()
+  for (var i:int = length(v).value - 1, i >= 0, i = i - 1) :
+    call-c g_args_add(args, to-g-circle-arc(get(v, new Int{i})).value)
+  return new g-array-circle-arc{call-c g_array_circle_arc_fab(args)}
+
+public lostanza defn to-g-nested-circle-arc (v:ref<PolyLine2f>) -> ref<g-nested-circle-arc> :
+  val args = call-c g_args_fab()
+  val strokes = strokes(v)
+  for (var i:int = 0, i < length(strokes).value, i = i + 1) :
+    call-c g_args_add(args, to-g-array-circle-arc(get(strokes, new Int{i})).value)
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_fab(args)}
+
+public lostanza defn to-polyline2f (v:ref<g-nested-circle-arc>, max-deviation:ref<Float>) -> ref<PolyLine2f> :
+  val polyline = g-nested-circle-arc-discretize(v, max-deviation)
+  return to-polyline2f(polyline)
+
+public lostanza defn to-polygon (v:ref<g-nested-circle-arc>, max-deviation:ref<Float>) -> ref<Polygon> :
+  return to-polygon(to-polyline2f(v, max-deviation))
+
+public lostanza defn to-g-nested-circle-arc (a:ref<g-array-circle-arc>) -> ref<g-nested-circle-arc> :
+  val args = call-c g_args_fab()
+  call-c g_args_add(args, a.value)
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_fab(args)}
+
+public lostanza defn g-nested-circle-arc-find-overlapping-offsets (a:ref<g-nested-circle-arc>, gap:ref<Float>) -> ref<g-nested-circle-arc> :
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_find_overlapping_offsets(gap.value, a.value)}
+
+public lostanza defn g-nested-circle-arc-discretize (a:ref<g-nested-circle-arc>, max-deviation:ref<Float>) -> ref<g-nested-v2d> :
+  return new g-nested-v2d{call-c g_nested_circle_arc_discretize(max-deviation.value, 1, a.value)}
+
+public lostanza defn g-nested-circle-arc-open-offset (a:ref<g-nested-circle-arc>, b:ref<Float>) -> ref<g-nested-circle-arc> :
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_open_offset(a.value, b.value)}
+
+public lostanza defn g-nested-circle-arc-closed-offset (a:ref<g-nested-circle-arc>, b:ref<Float>) -> ref<g-nested-circle-arc> :
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_closed_offset(a.value, b.value)}
+
+public lostanza defn g-nested-circle-arc-intersection (a:ref<g-nested-circle-arc>, b:ref<g-nested-circle-arc>) -> ref<g-nested-circle-arc> :
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_intersection(a.value, b.value)}
+  
+public lostanza defn g-nested-circle-arc-intersection (a:ref<g-nested-circle-arc>) -> ref<g-nested-circle-arc> :
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_intersection1(a.value)}
+  
+public lostanza defn g-nested-circle-arc-concat (a:ref<g-nested-circle-arc>, b:ref<g-nested-circle-arc>) -> ref<g-nested-circle-arc> :
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_concat(a.value, b.value)}
+  
+public lostanza defn g-nested-circle-arc-concat-all (arcz:ref<Tuple<g-nested-circle-arc>>) -> ref<g-nested-circle-arc> :
+  val args = call-c g_args_fab()
+  for (var i:int = 0, i < length(arcz).value, i = i + 1) :
+    call-c g_args_add(args, get(arcz, new Int{i}).value)
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_concat_all(args)}
+  
+public lostanza defn g-nested-circle-arc-difference (a:ref<g-nested-circle-arc>, b:ref<g-nested-circle-arc>) -> ref<g-nested-circle-arc> :
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_difference(a.value, b.value)}
+  
+public lostanza defn g-nested-circle-arc-union (a:ref<g-nested-circle-arc>, b:ref<g-nested-circle-arc>) -> ref<g-nested-circle-arc> :
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_union(a.value, b.value)}
+
+public lostanza defn g-nested-circle-arc-not (a:ref<g-nested-circle-arc>) -> ref<g-nested-circle-arc> :
+  return new g-nested-circle-arc{call-c g_nested_circle_arc_not(a.value)}
+
+public defn offset (amount:Float, a:g-nested-circle-arc) -> g-nested-circle-arc :
+  g-nested-circle-arc-closed-offset(a, amount)
+public defn open-offset (amount:Float, a:g-nested-circle-arc) -> g-nested-circle-arc :
+  g-nested-circle-arc-open-offset(a, amount)
+public defn to-g-nested-circle-arc (p:Polygon) -> g-nested-circle-arc :
+  to-g-nested-circle-arc $ to-polyline $ p
+
+public defn bit-or (a:g-nested-circle-arc, b:g-nested-circle-arc) -> g-nested-circle-arc :
+  g-nested-circle-arc-union(a, b)
+public defn bit-and (a:g-nested-circle-arc, b:g-nested-circle-arc) -> g-nested-circle-arc :
+  g-nested-circle-arc-intersection(a, b)
+public defn minus (a:g-nested-circle-arc, b:g-nested-circle-arc) -> g-nested-circle-arc :
+  g-nested-circle-arc-difference(a, b)
+
+public lostanza defn to-polyline2f (v:ref<g-nested-v2d>) -> ref<PolyLine2f> :
+  val strokes = Vector<Tuple<V2f>>()
+  val len = call-c g_nested_v2d_len(v.value)
+  for (var i:int = 0, i < len, i = i + 1) :
+    add(strokes, to-tuple-v2f(g-nested-v2d-elt(v, new Int{i})))
+  return PolyLine2f(to-tuple(strokes))
+
+public lostanza defn g-nested-v2d-elt (a:ref<g-nested-v2d>, i:ref<Int>) -> ref<g-array-v2d> :
+  return new g-array-v2d{call-c g_nested_v2d_elt(a.value, i.value)}
+
+public lostanza defn to-tuple-v2f (v:ref<g-array-v2d>) -> ref<Tuple<V2f>> :
+  val vec = Vector<V2f>()
+  val len = call-c g_array_v2d_len(v.value)
+  for (var i:int = 0, i < len, i = i + 1) :
+    val elt = g-array-v2d-elt(v, new Int{i})
+    add(vec, to-v2f(elt))
+  return to-tuple(vec)
