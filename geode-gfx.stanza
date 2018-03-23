@@ -1,0 +1,40 @@
+;; See license.txt for details about licensing.
+
+defpackage geode-gfx:
+  import core
+  import math
+  import collections
+  import geom
+  import gl
+  import gfx
+  import font
+  import geom-gfx
+  import geode
+
+defmethod render (p:g-polygon) -> False :
+  render(to-polygon(p))
+
+defmethod render (poly:g-nested-v3d) -> False :
+  render(to-polyline3f(poly))
+
+defmethod render (poly:g-nested-v2d) -> False :
+  render(to-polyline2f(poly))
+
+defmethod render (arcs:g-nested-circle-arc) -> False :
+  render(to-polygon(arcs, 1.0f / *resolution*))
+
+defmethod render (mesh:g-mesh) -> False :
+  render(to-mesh(mesh))
+
+defmethod render (s:Shape) -> False :
+  if name(s) is Symbol :
+    gl-push-matrix()
+    gl-push-attrib(GL-CURRENT-BIT)
+    gl-color3f(0.5f, 0.5f, 1.0f)
+    val EPSILON = 1.0e-6f
+    gl-translate3(set-elt(center(bounds(s)), 2, z(hi(bounds(s))) + EPSILON))
+    val size = dims(bounds(s))
+    draw-text(x(size), y(size), *font*, to-string(name(s)))
+    gl-pop-attrib()
+    gl-pop-matrix()
+  render(mesh(s))

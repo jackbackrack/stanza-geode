@@ -1,0 +1,713 @@
+defpackage geode :
+  import core
+  import math
+  import collections
+  import utils
+  import geom
+
+public deftype Shape <: AnyShape
+
+public defn shapes (any-shapes:Seqable<AnyShape>) -> Seqable<Shape> :
+  generate<Shape> : for e in any-shapes do : yield(e as Shape) when e is Shape
+
+public defn shapes (p:Poseable) : shapes(any-shapes(p))
+
+deftype g_any <: Geom
+  
+lostanza deftype g_args :
+  kind: int
+  
+public lostanza deftype g-args :
+  value: ptr<g_args>
+  
+lostanza deftype g_v2d :
+  kind : int
+  x : double
+  y : double
+
+public lostanza deftype g-v2d <: g_any :
+  value: ptr<g_v2d>
+  
+lostanza deftype g_v3d :
+  kind : int
+  x : double
+  y : double
+  z : double
+
+public lostanza deftype g-v3d <: g_any :
+  value: ptr<g_v3d>
+  
+lostanza deftype g_v3i :
+  kind : int
+  x : int
+  y : int
+  z : int
+
+public lostanza deftype g-v3i <: g_any :
+  value: ptr<g_v3i>
+  
+defmethod print (s:OutputStream, o:g-v3i) :
+  print-all(s, ["G-V3i()"])
+
+lostanza deftype g_mat :
+  kind : int
+  m00: double
+  m01: double
+  m02: double
+  m03: double
+  m10: double
+  m11: double
+  m12: double
+  m13: double
+  m20: double
+  m21: double
+  m22: double
+  m23: double
+  m30: double
+  m31: double
+  m32: double
+  m33: double
+
+public lostanza deftype g-mat :
+  value: ptr<g_mat>
+  
+defmethod print (s:OutputStream, o:g-mat) :
+  print-all(s, ["G-Mat()"])
+
+lostanza deftype g_array_v3i :
+  kind : int
+
+public lostanza deftype g-array-v3i <: g_any :
+  value: ptr<g_array_v3i>
+
+defmethod print (s:OutputStream, o:g-array-v3i) :
+  print-all(s, ["G-Array-V3i()"])
+
+lostanza deftype g_array_v2d :
+  kind : int
+
+public lostanza deftype g-array-v2d <: g_any :
+  value: ptr<g_array_v2d>
+
+defmethod print (s:OutputStream, o:g-array-v2d) :
+  print-all(s, ["G-Array-V2d()"])
+
+lostanza deftype g_array_v3d :
+  kind : int
+
+public lostanza deftype g-array-v3d <: g_any :
+  value: ptr<g_array_v3d>
+
+defmethod print (s:OutputStream, o:g-array-v3d) :
+  print-all(s, ["G-Array-V3d()"])
+
+lostanza deftype g_nested_v2d :
+  kind : int
+
+public lostanza deftype g-nested-v2d <: g_any :
+  value: ptr<g_nested_v2d>
+
+defmethod print (s:OutputStream, o:g-nested-v2d) :
+  print-all(s, ["G-Nested-V2d()"])
+
+lostanza deftype g_nested_v3d :
+  kind : int
+
+public lostanza deftype g-nested-v3d <: g_any :
+  value: ptr<g_nested_v3d>
+
+defmethod print (s:OutputStream, o:g-nested-v3d) :
+  print-all(s, ["G-Nested-V3d()"])
+
+lostanza deftype g_mesh :
+  kind : int
+
+public lostanza deftype g-mesh <: g_any :
+  value: ptr<g_mesh>
+
+defmethod print (s:OutputStream, o:g-mesh) :
+  print-all(s, ["G-Mesh()"])
+
+lostanza deftype g_polygon :
+  kind : int
+
+public lostanza deftype g-polygon <: g_any&Poseable :
+  value: ptr<g_polygon>
+
+defmethod print (s:OutputStream, o:g-polygon) :
+  print-all(s, ["G-Polygon()"])
+
+extern g_args_fab: () -> ptr<g_args>
+extern g_args_add: (ptr<g_args>, ptr<?>) -> ptr<g_args>
+
+extern g_v2d_fab: (float, float) -> ptr<g_v2d>
+extern g_v3d_fab: (float, float, float) -> ptr<g_v3d>
+extern g_v3i_fab: (int, int, int) -> ptr<g_v3i>
+
+extern g_mat_fab: (float, float, float, float, float, float, float, float,
+                   float, float, float, float, float, float, float, float) -> ptr<g_mat>
+extern g_mat_mat44f_fab: (ptr<float>) -> ptr<g_mat>
+
+extern g_array_v2d_fab: (ptr<g_args>) -> ptr<g_array_v2d>
+extern g_array_v2d_elt: (ptr<g_array_v2d>, int) -> ptr<g_v2d>
+extern g_array_v2d_len: (ptr<g_array_v2d>) -> int
+
+extern g_array_v3d_fab: (ptr<g_args>) -> ptr<g_array_v3d>
+extern g_array_v3d_elt: (ptr<g_array_v3d>, int) -> ptr<g_v3d>
+extern g_array_v3d_len: (ptr<g_array_v3d>) -> int
+
+extern g_array_v3i_fab: (ptr<g_args>) -> ptr<g_array_v3i>
+extern g_array_v3i_elt: (ptr<g_array_v3i>, int) -> ptr<g_v3i>
+extern g_array_v3i_len: (ptr<g_array_v3i>) -> int
+
+extern g_bbox2_min: (ptr<g_array_v2d>) -> ptr<g_v2d>
+extern g_bbox2_max: (ptr<g_array_v2d>) -> ptr<g_v2d>
+
+extern g_bbox3_min: (ptr<g_array_v3d>) -> ptr<g_v3d>
+extern g_bbox3_max: (ptr<g_array_v3d>) -> ptr<g_v3d>
+
+extern g_nested_v2d_fab: (ptr<g_args>) -> ptr<g_nested_v2d>
+extern g_nested_v2d_elt: (ptr<g_nested_v2d>, int) -> ptr<g_array_v2d>
+extern g_nested_v2d_len: (ptr<g_nested_v2d>) -> int
+
+extern g_nested_v3d_fab: (ptr<g_args>) -> ptr<g_nested_v3d>
+extern g_nested_v3d_elt: (ptr<g_nested_v3d>, int) -> ptr<g_array_v3d>
+extern g_nested_v3d_len: (ptr<g_nested_v3d>) -> int
+
+extern g_polygon_fab: (ptr<g_args>) -> ptr<g_polygon>
+extern g_polygon_elt: (ptr<g_polygon>, int) -> ptr<g_array_v2d>
+extern g_polygon_len: (ptr<g_polygon>) -> int
+
+extern g_mesh_fab: (ptr<g_args>) -> ptr<g_mesh>
+extern g_mesh_points: (ptr<g_mesh>) -> ptr<g_array_v3d>
+extern g_mesh_faces: (ptr<g_mesh>) -> ptr<g_array_v3i>
+
+extern g_mesh_sphere: (float) -> ptr<g_mesh>
+extern g_mesh_cone: (float, ptr<g_polygon>) -> ptr<g_mesh>
+
+extern g_mesh_none: () -> ptr<g_mesh>
+extern g_mesh_all: () -> ptr<g_mesh>
+
+extern g_mesh_cube: (float) -> ptr<g_mesh>
+extern g_mesh_cube_lo_hi: (ptr<g_v3d>, ptr<g_v3d>) -> ptr<g_mesh>
+extern g_mesh_bounds: (ptr<g_mesh>) -> ptr<g_array_v3d>
+extern g_mesh_mul: (ptr<g_mat>, ptr<g_mesh>) -> ptr<g_mesh>
+extern g_mesh_intersection: (ptr<g_mesh>, ptr<g_mesh>) -> ptr<g_mesh>
+extern g_mesh_union: (ptr<g_mesh>, ptr<g_mesh>) -> ptr<g_mesh>
+extern g_mesh_difference: (ptr<g_mesh>, ptr<g_mesh>) -> ptr<g_mesh>
+extern g_mesh_not: (ptr<g_mesh>) -> ptr<g_mesh>
+extern g_mesh_offset: (float, ptr<g_mesh>) -> ptr<g_mesh>
+extern g_mesh_offset_rough: (float, ptr<g_mesh>) -> ptr<g_mesh>
+extern g_mesh_slice: (float, ptr<g_mesh>) -> ptr<g_polygon>
+extern g_mesh_hull: (ptr<g_mesh>) -> ptr<g_mesh>
+extern g_mesh_extrude: (float, ptr<g_polygon>) -> ptr<g_mesh>
+extern g_mesh_save: (ptr<byte>, ptr<g_mesh>) -> ptr<g_mesh>
+extern g_mesh_load: (ptr<byte>) -> ptr<g_mesh>
+
+extern g_polygon_circle: (float) -> ptr<g_polygon>
+extern g_polygon_square: (float) -> ptr<g_polygon>
+extern g_polygon_square_lo_hi: (ptr<g_v2d>, ptr<g_v2d>) -> ptr<g_polygon>
+
+extern g_polygon_none: () -> ptr<g_polygon>
+extern g_polygon_all: () -> ptr<g_polygon>
+
+extern g_polygon_thicken: (float, ptr<g_nested_v2d>) -> ptr<g_polygon>
+
+extern g_polygon_bounds: (ptr<g_polygon>) -> ptr<g_array_v2d>
+extern g_polygon_mul: (ptr<g_mat>, ptr<g_polygon>) -> ptr<g_polygon>
+extern g_polygon_intersection: (ptr<g_polygon>, ptr<g_polygon>) -> ptr<g_polygon>
+extern g_polygon_union: (ptr<g_polygon>, ptr<g_polygon>) -> ptr<g_polygon>
+extern g_polygon_difference: (ptr<g_polygon>, ptr<g_polygon>) -> ptr<g_polygon>
+extern g_polygon_not: (ptr<g_polygon>) -> ptr<g_polygon>
+extern g_polygon_offset: (float, ptr<g_polygon>) -> ptr<g_polygon>
+extern g_polygon_hull: (ptr<g_polygon>) -> ptr<g_polygon>
+extern g_polygon_revolve: (ptr<g_polygon>) -> ptr<g_mesh>
+extern g_polygon_save: (ptr<byte>, ptr<g_polygon>) -> ptr<g_polygon>
+extern g_polygon_load: (ptr<byte>) -> ptr<g_polygon>
+
+public lostanza defn to-mat44f (m:ref<g-mat>) -> ref<Mat44f> :
+  return new Mat44f{m.value.m00 as float, m.value.m01 as float, m.value.m02 as float, m.value.m03 as float,
+                    m.value.m10 as float, m.value.m11 as float, m.value.m12 as float, m.value.m13 as float,
+                    m.value.m20 as float, m.value.m21 as float, m.value.m22 as float, m.value.m23 as float,
+                    m.value.m30 as float, m.value.m31 as float, m.value.m32 as float, m.value.m33 as float}
+
+public lostanza defn to-g-mat (m:ref<Mat44f>) -> ref<g-mat> :
+  return new g-mat{call-c g_mat_fab(m.m00, m.m01, m.m02, m.m03,
+                                    m.m10, m.m11, m.m12, m.m13,
+                                    m.m20, m.m21, m.m22, m.m23,
+                                    m.m30, m.m31, m.m32, m.m33)}
+
+public lostanza defn g-v3d (x:ref<Float>, y:ref<Float>, z:ref<Float>) -> ref<g-v3d> :
+  return new g-v3d{call-c g_v3d_fab(x.value, y.value, z.value)}
+
+public lostanza defn g-v2d (x:ref<Float>, y:ref<Float>) -> ref<g-v2d> :
+  return new g-v2d{call-c g_v2d_fab(x.value, y.value)}
+
+public lostanza defn g-v3i (x:ref<Int>, y:ref<Int>, z:ref<Int>) -> ref<g-v3i> :
+  return new g-v3i{call-c g_v3i_fab(x.value, y.value, z.value)}
+
+public lostanza defn to-v3i (v:ref<g-v3i>) -> ref<V3i> :
+  return new V3i{v.value.x, v.value.y, v.value.z}
+
+public lostanza defn to-v3f (v:ref<g-v3d>) -> ref<V3f> :
+  return new V3f{v.value.x as float, v.value.y as float, v.value.z as float}
+
+public lostanza defn to-v2f (v:ref<g-v2d>) -> ref<V2f> :
+  return new V2f{v.value.x as float, v.value.y as float}
+
+public lostanza defn to-g-v3i (v:ref<V3i>) -> ref<g-v3i> :
+  return new g-v3i{call-c g_v3i_fab(x(v).value, y(v).value, z(v).value)}
+
+public lostanza defn to-g-v3d (v:ref<V3f>) -> ref<g-v3d> :
+  return new g-v3d{call-c g_v3d_fab(x(v).value, y(v).value, z(v).value)}
+
+public lostanza defn to-g-v2d (v:ref<V2f>) -> ref<g-v2d> :
+  return new g-v2d{call-c g_v2d_fab(x(v).value, y(v).value)}
+
+public lostanza defn g-array-v3d-len (a:ref<g-array-v3d>) -> ref<Int> :
+  return new Int{call-c g_array_v3d_len(a.value)}
+
+public lostanza defn g-array-v3d-elt (a:ref<g-array-v3d>, i:ref<Int>) -> ref<g-v3d> :
+  return new g-v3d{call-c g_array_v3d_elt(a.value, i.value)}
+
+public lostanza defn g-array-v2d-len (a:ref<g-array-v2d>) -> ref<Int> :
+  return new Int{call-c g_array_v2d_len(a.value)}
+
+public lostanza defn g-array-v2d-elt (a:ref<g-array-v2d>, i:ref<Int>) -> ref<g-v2d> :
+  return new g-v2d{call-c g_array_v2d_elt(a.value, i.value)}
+
+public lostanza defn g-array-v3i-len (a:ref<g-array-v3i>) -> ref<Int> :
+  return new Int{call-c g_array_v3i_len(a.value)}
+
+public lostanza defn g-array-v3i-elt (a:ref<g-array-v3i>, i:ref<Int>) -> ref<g-v3i> :
+  return new g-v3i{call-c g_array_v3i_elt(a.value, i.value)}
+
+public lostanza defn g-nested-v3d-len (a:ref<g-nested-v3d>) -> ref<Int> :
+  return new Int{call-c g_nested_v3d_len(a.value)}
+
+public lostanza defn g-nested-v3d-elt (a:ref<g-nested-v3d>, i:ref<Int>) -> ref<g-array-v3d> :
+  return new g-array-v3d{call-c g_nested_v3d_elt(a.value, i.value)}
+
+public lostanza defn g-nested-v2d-len (a:ref<g-nested-v2d>) -> ref<Int> :
+  return new Int{call-c g_nested_v2d_len(a.value)}
+
+public lostanza defn g-nested-v2d-elt (a:ref<g-nested-v2d>, i:ref<Int>) -> ref<g-array-v2d> :
+  return new g-array-v2d{call-c g_nested_v2d_elt(a.value, i.value)}
+
+public lostanza defn g-polygon-len (a:ref<g-polygon>) -> ref<Int> :
+  return new Int{call-c g_polygon_len(a.value)}
+
+public lostanza defn g-polygon-elt (a:ref<g-polygon>, i:ref<Int>) -> ref<g-array-v2d> :
+  return new g-array-v2d{call-c g_polygon_elt(a.value, i.value)}
+
+public lostanza defn to-box2f (v:ref<g-array-v2d>) -> ref<Box2f> :
+  val elts = to-tuple-v2f(v)
+  return Box2f(get(elts, new Int{0}), get(elts, new Int{1}))
+
+public lostanza defn to-box3f (v:ref<g-array-v3d>) -> ref<Box3f> :
+  val elts = to-tuple-v3f(v)
+  return Box3f(get(elts, new Int{0}), get(elts, new Int{1}))
+
+public lostanza defn to-tuple-v2f (v:ref<g-array-v2d>) -> ref<Tuple<V2f>> :
+  val vec = Vector<V2f>()
+  val len = call-c g_array_v2d_len(v.value)
+  for (var i:int = 0, i < len, i = i + 1) :
+    val elt = g-array-v2d-elt(v, new Int{i})
+    add(vec, to-v2f(elt))
+  return to-tuple(vec)
+
+public lostanza defn to-tuple-v3f (v:ref<g-array-v3d>) -> ref<Tuple<V3f>> :
+  val vec = Vector<V3f>()
+  val len = call-c g_array_v3d_len(v.value)
+  for (var i:int = 0, i < len, i = i + 1) :
+    val elt = g-array-v3d-elt(v, new Int{i})
+    add(vec, to-v3f(elt))
+  return to-tuple(vec)
+
+public lostanza defn to-tuple-v3i (v:ref<g-array-v3i>) -> ref<Tuple<V3i>> :
+  val vec = Vector<V3i>()
+  val len = call-c g_array_v3i_len(v.value)
+  for (var i:int = 0, i < len, i = i + 1) :
+    val elt = g-array-v3i-elt(v, new Int{i})
+    add(vec, to-v3i(elt))
+  return to-tuple(vec)
+
+public lostanza defn to-g-array-v2d (v:ref<Tuple<V2f>>) -> ref<g-array-v2d> :
+  val args = call-c g_args_fab()
+  for (var i:int = 0, i < length(v).value, i = i + 1) :
+    call-c g_args_add(args, to-g-v2d(get(v, new Int{i})).value)
+  return new g-array-v2d{call-c g_array_v2d_fab(args)}
+
+public lostanza defn to-g-array-v3d (v:ref<Tuple<V3f>>) -> ref<g-array-v3d> :
+  val args = call-c g_args_fab()
+  for (var i:int = 0, i < length(v).value, i = i + 1) :
+    call-c g_args_add(args, to-g-v3d(get(v, new Int{i})).value)
+  return new g-array-v3d{call-c g_array_v3d_fab(args)}
+
+public lostanza defn to-g-array-v3i (v:ref<Tuple<V3i>>) -> ref<g-array-v3i> :
+  val args = call-c g_args_fab()
+  for (var i:int = 0, i < length(v).value, i = i + 1) :
+    call-c g_args_add(args, to-g-v3i(get(v, new Int{i})).value)
+  return new g-array-v3i{call-c g_array_v3i_fab(args)}
+
+public lostanza defn to-g-polygon (v:ref<Polygon>) -> ref<g-polygon> :
+  val args = call-c g_args_fab()
+  val contours = contours(v)
+  for (var i:int = 0, i < length(contours).value, i = i + 1) :
+    call-c g_args_add(args, to-g-array-v2d(vertices(get(contours, new Int{i}))).value)
+  return new g-polygon{call-c g_polygon_fab(args)}
+
+public lostanza defn to-g-nested-v3d (v:ref<PolyLine3f>) -> ref<g-nested-v3d> :
+  val args = call-c g_args_fab()
+  val strokes = strokes(v)
+  for (var i:int = 0, i < length(strokes).value, i = i + 1) :
+    call-c g_args_add(args, to-g-array-v3d(get(strokes, new Int{i})).value)
+  return new g-nested-v3d{call-c g_nested_v3d_fab(args)}
+
+public lostanza defn to-g-nested-v2d (v:ref<PolyLine2f>) -> ref<g-nested-v2d> :
+  val args = call-c g_args_fab()
+  val strokes = strokes(v)
+  for (var i:int = 0, i < length(strokes).value, i = i + 1) :
+    call-c g_args_add(args, to-g-array-v2d(get(strokes, new Int{i})).value)
+  return new g-nested-v2d{call-c g_nested_v2d_fab(args)}
+
+public lostanza defn to-polyline3f (v:ref<g-nested-v3d>) -> ref<PolyLine3f> :
+  val strokes = Vector<Tuple<V3f>>()
+  val len = call-c g_nested_v3d_len(v.value)
+  for (var i:int = 0, i < len, i = i + 1) :
+    add(strokes, to-tuple-v3f(g-nested-v3d-elt(v, new Int{i})))
+  return PolyLine3f(to-tuple(strokes))
+
+public lostanza defn to-polyline2f (v:ref<g-nested-v2d>) -> ref<PolyLine2f> :
+  val strokes = Vector<Tuple<V2f>>()
+  val len = call-c g_nested_v2d_len(v.value)
+  for (var i:int = 0, i < len, i = i + 1) :
+    add(strokes, to-tuple-v2f(g-nested-v2d-elt(v, new Int{i})))
+  return PolyLine2f(to-tuple(strokes))
+
+public lostanza defn to-polygon (v:ref<g-polygon>) -> ref<Polygon> :
+  val contours = Vector<Contour>()
+  val len = call-c g_polygon_len(v.value)
+  for (var i:int = 0, i < len, i = i + 1) :
+    val elt = to-tuple-v2f(g-polygon-elt(v, new Int{i}))
+    add(contours, Contour(elt))
+  return Polygon(to-tuple(contours))
+
+public lostanza defn g-mesh-points (m:ref<g-mesh>) -> ref<g-array-v3d> :
+  return new g-array-v3d{call-c g_mesh_points(m.value)}
+
+public lostanza defn g-mesh-faces (m:ref<g-mesh>) -> ref<g-array-v3i> :
+  return new g-array-v3i{call-c g_mesh_faces(m.value)}
+
+public lostanza defn to-mesh (m:ref<g-mesh>) -> ref<Mesh> :
+  val faces = to-tuple-v3i(g-mesh-faces(m))
+  val points = to-tuple-v3f(g-mesh-points(m))
+  return Mesh(points, faces)
+
+public lostanza defn to-g-mesh (m:ref<Mesh>) -> ref<g-mesh> :
+  val args = call-c g_args_fab()
+  call-c g_args_add(args, to-g-array-v3d(vertices(m)).value)
+  call-c g_args_add(args, to-g-array-v3i(faces(m)).value)
+  return new g-mesh{call-c g_mesh_fab(args)}
+
+public lostanza defn g-mesh-sphere (d:ref<Float>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_sphere(d.value)}
+
+public lostanza defn g-mesh-cube (d:ref<Float>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_cube(d.value)}
+
+public lostanza defn g-mesh-cube-lo-hi (lo:ref<g-v3d>, hi:ref<g-v3d>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_cube_lo_hi(lo.value, hi.value)}
+
+public lostanza defn g-mesh-cone (h:ref<Float>, p:ref<g-polygon>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_cone(h.value, p.value)}
+
+public lostanza defn g-mesh-none () -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_none()}
+
+public lostanza defn g-mesh-all () -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_all()}
+
+public lostanza defn g-mesh-bounds (m:ref<g-mesh>) -> ref<g-array-v3d> :
+  return new g-array-v3d{call-c g_mesh_bounds(m.value)}
+  
+public lostanza defn g-mesh-mul (mat:ref<g-mat>, mesh:ref<g-mesh>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_mul(mat.value, mesh.value)}
+  
+public lostanza defn g-mesh-intersection (a:ref<g-mesh>, b:ref<g-mesh>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_intersection(a.value, b.value)}
+  
+public lostanza defn g-mesh-union (a:ref<g-mesh>, b:ref<g-mesh>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_union(a.value, b.value)}
+  
+public lostanza defn g-mesh-difference (a:ref<g-mesh>, b:ref<g-mesh>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_difference(a.value, b.value)}
+  
+public lostanza defn g-mesh-not (m:ref<g-mesh>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_not(m.value)}
+  
+public lostanza defn g-mesh-offset (a:ref<Float>, m:ref<g-mesh>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_offset(a.value, m.value)}
+  
+public lostanza defn g-mesh-offset-rough (a:ref<Float>, m:ref<g-mesh>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_offset_rough(a.value, m.value)}
+  
+public lostanza defn g-mesh-slice (z:ref<Float>, m:ref<g-mesh>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_mesh_slice(z.value, m.value)}
+  
+public lostanza defn g-mesh-hull (m:ref<g-mesh>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_hull(m.value)}
+  
+public lostanza defn g-mesh-extrude (h:ref<Float>, p:ref<g-polygon>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_extrude(h.value, p.value)}
+  
+public lostanza defn g-mesh-save (f:ref<String>, m:ref<g-mesh>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_save(addr!(f.chars), m.value)}
+  
+public lostanza defn g-mesh-load (f:ref<String>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_mesh_load(addr!(f.chars))}
+  
+public lostanza defn g-polygon-circle (d:ref<Float>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_circle(d.value)}
+  
+public lostanza defn g-polygon-square (d:ref<Float>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_square(d.value)}
+  
+public lostanza defn g-polygon-square-lo-hi (lo:ref<g-v2d>, hi:ref<g-v2d>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_square_lo_hi(lo.value, hi.value)}
+  
+
+public lostanza defn g-polygon-none () -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_none()}
+  
+public lostanza defn g-polygon-all () -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_all()}
+  
+
+public lostanza defn g-polygon-thicken (a:ref<Float>, l:ref<g-nested-v2d>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_thicken(a.value, l.value)}
+  
+
+public lostanza defn g-polygon-bounds (p:ref<g-polygon>) -> ref<g-array-v2d> :
+  return new g-array-v2d{call-c g_polygon_bounds(p.value)}
+  
+public lostanza defn g-polygon-mul (m:ref<g-mat>, p:ref<g-polygon>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_mul(m.value, p.value)}
+  
+public lostanza defn g-polygon-intersection (a:ref<g-polygon>, b:ref<g-polygon>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_intersection(a.value, b.value)}
+  
+public lostanza defn g-polygon-union (a:ref<g-polygon>, b:ref<g-polygon>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_union(a.value, b.value)}
+  
+public lostanza defn g-polygon-difference (a:ref<g-polygon>, b:ref<g-polygon>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_difference(a.value, b.value)}
+  
+public lostanza defn g-polygon-not (p:ref<g-polygon>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_not(p.value)}
+  
+public lostanza defn g-polygon-offset (a:ref<Float>, p:ref<g-polygon>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_offset(a.value, p.value)}
+  
+public lostanza defn g-polygon-hull (p:ref<g-polygon>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_hull(p.value)}
+  
+public lostanza defn g-polygon-revolve (p:ref<g-polygon>) -> ref<g-mesh> :
+  return new g-mesh{call-c g_polygon_revolve(p.value)}
+  
+public lostanza defn g-polygon-save (f:ref<String>, p:ref<g-polygon>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_save(addr!(f.chars), p.value)}
+  
+public lostanza defn g-polygon-load (f:ref<String>) -> ref<g-polygon> :
+  return new g-polygon{call-c g_polygon_load(addr!(f.chars))}
+  
+
+;;; 
+
+;; extern Geom* g_bbox(Geom* g);
+;; extern Geom* g_dims(Geom* g);
+;; extern Geom* g_center(Geom* g);
+;; extern Geom* g_centering(Geom* g);
+;; extern char* g_c_str(Geom* g);
+;; extern Geom* g_to_str(Geom* g);
+;; extern Geom* g_print(Geom* g);
+;; extern Geom* g_check(Geom* g);
+;; extern Geom* g_pretty_print(Geom* g);
+;; extern Geom* g_pi(void);
+;; extern Geom* g_letter(Geom* a);
+;; extern Geom* g_text(Geom* a);
+;; extern Geom* g_elt(Geom* g, Geom* i);
+;; 
+;; extern Geom* g_add(Geom* a, Geom* b);
+;; extern Geom* g_magnitude(Geom* a);
+;; extern Geom* g_normalize(Geom* a);
+;; extern Geom* g_cross(Geom* a, Geom* b);
+;; extern Geom* g_dot(Geom* a, Geom* b);
+;; extern Geom* g_mul(Geom* a, Geom* b);
+;; extern Geom* g_div(Geom* a, Geom* b);
+;; extern Geom* g_dither(Geom* a);
+;; extern Geom* g_sub(Geom* a, Geom* b);
+;; extern Geom* g_hollow(Geom* a, Geom* m);
+;; extern Geom* g_simplify(Geom* g);
+;; extern Geom* g_cleanup(Geom* g);
+;; extern Geom* g_taper(Geom* l, Geom* r0, Geom* r1, Geom* p);
+;; extern Geom* g_to_mesh(Geom* g);
+;; extern Geom* g_to_tree(Geom* g, Geom* rad, Geom* thresh);
+
+public defmulti mesh (s:Shape) -> g-mesh
+
+public defn Shape (mesh:g-mesh, name:False|Symbol, color:V4f, tags:Tuple<Symbol>, points:Tuple<V3f>) :
+  val state = AnyShapeState(name, color, tags, points)
+  new Shape :
+    defmethod state (this) : state
+    defmethod tags (this) : tags
+    defmethod any-shapes (this) : [ this ]
+    defmethod mesh (this) : mesh
+
+defmethod print (s:OutputStream, o:Shape) :
+  print-all(s, ["Shape(" bounds(o) ")"])
+
+public defmethod bounds (s:Shape) : to-box3f $ g-mesh-bounds(mesh(s))
+
+public defmethod clone (s:Shape, name:Symbol, color:V4f, points:Tuple<V3f>, tags:Tuple<Symbol>) -> Shape :
+  Shape(mesh(s), name, color, tags, points)
+
+public defn Shape (m:g-mesh) : Shape(m, false, WHITE, [], [])
+
+public defn Shape (s:Shape, bounds:Box3f) :
+  Shape(mesh(s), name(s), color(s), tags(s), points(s))
+
+;;; 3D API
+
+defmethod xyz (mat:Mat44f, s:Shape, ) : 
+  Shape(g-mesh-mul(to-g-mat(mat), mesh(s)))
+
+public defn cube (xlo:Float, ylo:Float, zlo:Float, xhi:Float, yhi:Float, zhi:Float) :
+  Shape(g-mesh-cube-lo-hi(g-v3d(xlo, ylo, zlo), g-v3d(xhi, yhi, zhi)))
+public defmethod bit-or (a:Shape, b:Shape) -> Shape :
+  Shape(g-mesh-union(mesh(a), mesh(b)))
+public defn bit-and (a:Shape, b:Shape) -> Shape :
+  Shape(g-mesh-intersection(mesh(a), mesh(b)))
+public defn intersection (args:Seqable<Shape>) -> Shape :
+  reduce(bit-and, args)
+public defn rem (a:Shape, b:Shape) -> Shape : 
+  Shape(g-mesh-difference(mesh(a), mesh(b)))
+public defn slice (z:Float, s:Shape) -> Polygon :
+  to-polygon $ g-mesh-slice(z, mesh(s))
+public defn hull (s:Shape) -> Shape : 
+  Shape(g-mesh-hull(mesh(s)))
+public defn pixels (z:Float, s:Shape) -> Pixels : todo-pixels()
+public defn dump (filename:String, s:Shape) -> False : false
+public defn save (z:Float, filename:String, s:Shape) -> False : false
+public defn save (filename:String, s:Shape) -> False : false
+       
+public defn sphere (d:Float) -> Shape : Shape(g-mesh-sphere(d))
+public defn cone (d:Float, h:Float) : todo-shape()
+public defn pyramid (d:Float, h:Float) : todo-shape()
+public defn torus (D:Float, d:Float) : todo-shape()
+public defn offset (o:Float, s:Shape) -> Shape : Shape(g-mesh-offset(o, mesh(s)))
+public defn offset-rough (o:Float, s:Shape) -> Shape : Shape(g-mesh-offset-rough(o, mesh(s)))
+public defn clearance (a:Shape, b:Shape, o:Float) -> Shape : todo-shape()
+public defn thicken (g:PolyLine2f|Contour|Polygon, f:(V2f, V2f, Float) -> Shape, d:Float) : todo-shape()
+public defn thicken (g:PolyLine3f, f:(V3f, V3f, Float) -> Shape, d:Float) : todo-shape()
+public defn capsule (a:V3f, b:V3f, d:Float) : todo-shape()
+
+;;; 3D SUPPORT
+
+;; public defmethod rgb (c:V4f, s:Shape) -> Shape : s
+
+public defn cube (w:Float, h:Float, d:Float) : cube(dim-min(w), dim-min(h), dim-min(d), dim-max(w), dim-max(h), dim-max(d))
+public defn cube (d:Float) : cube(d, d, d)
+public defn cube (xy:Float, z:Float) : cube(xy, xy, z)
+public defn cube (v:V3f) : cube(x(v), y(v), z(v))
+public defn box (b:Box3f) : cube(x(lo(b)), y(lo(b)), z(lo(b)), x(hi(b)), y(hi(b)), z(hi(b)))
+public defn cylinder (d:Float, h:Float) : extrude(h, circle(d))
+public defn capsule3 (d:Float, h:Float) :
+  val r = 0.5f * h
+  cylinder(d, h) | mov-z(r, sphere(d)) | mov-z((- r), sphere(d))
+public defn thicken (segments:Seqable<[V3f, V3f]>, f:(V3f, V3f, Float) -> Shape, d:Float) -> Shape :
+  val caps = for [v0, v1] in segments seq : f(v0, v1, d)
+  reduce(fn (a:Shape, b:Shape): a | b, caps)
+
+;;; 2D API
+
+public defn rect (xlo:Float, ylo:Float, xhi:Float, yhi:Float) -> g-polygon :
+  g-polygon-square-lo-hi(g-v2d(xlo, ylo), g-v2d(xhi, yhi))
+public defn extrude (zmin:Float, zmax:Float, poly:g-polygon) -> Shape :
+  Shape(g-mesh-extrude(zmax - zmin, poly))
+public defn triangle (a:V3f, b:V3f, c:V3f) -> g-polygon :
+  to-g-polygon $ to-polygon $ Contour([xy(a) xy(b) xy(c)])
+public defn circle (d:Float) -> g-polygon :
+  g-polygon-circle(d)
+public defn xy (z:Float, s:Shape) -> g-polygon :
+  g-mesh-slice(z, mesh(s))
+
+public defn bit-or (a:g-polygon, b:g-polygon) -> g-polygon :
+  g-polygon-union(a, b)
+public defn bit-and (a:g-polygon, b:g-polygon) -> g-polygon :
+  g-polygon-intersection(a, b)
+public defn rem (a:g-polygon, b:g-polygon) -> g-polygon : 
+  g-polygon-difference(a, b)
+public defn hull (p:g-polygon) -> g-polygon : 
+  g-polygon-hull(p)
+
+defmethod xyz (mat:Mat44f, p:g-polygon) : 
+  g-polygon-mul(to-g-mat(mat), p)
+
+;;; 2D SUPPORT
+
+public defn xy (s:Shape) -> g-polygon : xy(0.0f, s)
+public defn rect (w:Float, h:Float) : rect(dim-min(w), dim-min(h), dim-max(w), dim-max(h))
+public defn square (d:Float) : rect(d, d)
+public defn capsule2 (d:Float, w:Float) :
+  val r = 0.5f * w
+  rect(w, d) | mov-x(r, circle(d)) | mov-x((- r), circle(d))
+
+;; public defn intersection (args:Seqable<Shape>) -> Shape :
+;;   reduce(bit-and, args)
+
+;; public defn rem (a:Shape, args:Seqable<Shape>) -> Shape :
+;;   rem(a, union(args))
+
+;; public defn rem (shapes:Seqable<Shape>) -> Shape :
+;;   val s = to-seq(shapes)
+;;   rem(next(s), s)
+
+public defn extrude (h:Float, poly:g-polygon) -> Shape :
+  extrude(dim-min(h), dim-max(h), poly)
+
+public defn extrude (h:Float) : extrude{h, _}
+
+;; public defn thicken (segments:Seqable<[V3f, V3f]>, f:(V3f, V3f, Float) -> Shape, d:Float) -> Shape :
+;;   val caps = for [v0, v1] in segments seq : f(v0, v1, d)
+;;   reduce(fn (a:Shape, b:Shape): a | b, caps)
+
+public var *resolution* = 8.0f
+public var *render-offset* = 16.0f
+
+public deftype Glue <: ShapeGlue&Shape
+
+public defn Glue (amount:Float) :
+  new Glue :
+    defmethod bounds (this): Box3f(V3f(0.0f, 0.0f, 0.0f), V3f(0.0f, 0.0f, 0.0f))
+    defmethod amount (this): amount
+
+defmethod glue-of (s:Shape, a:Float) -> Shape : Glue(a)
+defmethod glue-of (s:Assembly, a:Float) -> Assembly : AssemblyGlue(Glue(a))
+
+public defn empty () : Shape(g-mesh-none())
+
+defn spacer-empty () : cube(0.0f)
+
+;; defn todo-shape () : empty()
+defn todo-shape () : spacer-empty()
+defn todo-polygon () : g-polygon-none()
+
+defn todo-pixels () : Pixels(V3i(1, 1, 1), 1.0f, ByteArray(1))
+
+defmethod spacer (g:Shape, gdims:V3f) : cube(gdims)
+defmethod spacer (g:Assembly, dims:V3f) : rgb(BLACK, Assembly([ spacer(spacer-empty(), dims) ]))
+
+public defn spacer-x (gdim:Float) : spacer-x(gdim, spacer-empty())
+public defn spacer-y (gdim:Float) : spacer-y(gdim, spacer-empty())
+public defn spacer-z (gdim:Float) : spacer-z(gdim, spacer-empty())
