@@ -4,7 +4,7 @@ defpackage geode-repl :
    import collections
    import geom
    import geode
-   import sheet
+   ;; import sheet
    import glu
    import font
    import utils

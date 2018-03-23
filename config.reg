@@ -6,6 +6,10 @@ defregistry stanza-geode :
       dependency "${GEN}/geode-circle-arcs.o"
       link Darwin ["${GEN}/geode-circle-arcs.o" "-lgeode" "-lc++" "-framework OpenGL"]
       link GNU/Linux ["${GEN}/geode-circle-arcs.o" "-lgeode" "-lstdc++" "-lGLU"]
+  file "geode.stanza" :
+    package geode :
+      link Darwin ["${GEN}/cad.a" "-lgeode" "-lc++" "-framework OpenGL"]
+      link GNU/Linux ["${GEN}/cad.a" "-lgeode" "-lstdc++" "-lGLU"]
   file "geode-gfx.stanza"
   file "geode-eval.stanza"
   file "geode-repl.stanza"
