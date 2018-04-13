@@ -123,24 +123,33 @@ extern Geom* g_nested_circle_arc(Nested<CircleArc> arcz);
 extern Geom* g_circle_arcs (std::vector<Geom*> args);
 
 extern "C" Geom* g_args_fab(void);
+extern "C" void g_args_delete(Geom *g);
 extern "C" Geom* g_args_add(Geom* g, Geom* e);
 extern "C" int g_args_len(Geom* g);
 extern std::vector<Geom*> g_args_val(Geom* g);
 
+extern "C" Geom* g_v2d_fab(float x, float y);
+extern "C" void g_v2d_delete(Geom* g);
+
+extern "C" void g_array_v2d_delete(Geom *g);
 extern "C" Geom* g_array_v2d_elt(Geom* g, int idx);
 extern "C" int g_array_v2d_len(Geom* g);
 
+extern "C" void g_nested_v2d_delete(Geom *g);
 extern "C" Geom* g_nested_v2d_elt(Geom* g, int idx);
 extern "C" int g_nested_v2d_len(Geom* g);
 
 extern "C" Geom* g_circle_arc_fab(float x, float y, float q);
+extern "C" void g_circle_arc_delete(Geom *g);
 extern "C" float g_circle_arc_x(Geom* g);
 extern "C" float g_circle_arc_y(Geom* g);
 extern "C" float g_circle_arc_q(Geom* g);
 extern "C" Geom* g_array_circle_arc_fab(Geom* args);
+extern "C" void g_array_circle_arc_delete(Geom *g);
 extern "C" Geom* g_array_circle_arc_elt(Geom* g, int idx);
 extern "C" int g_array_circle_arc_len(Geom* g);
 extern "C" Geom* g_nested_circle_arc_fab(Geom* args);
+extern "C" void g_nested_circle_arc_delete(Geom *g);
 extern "C" Geom* g_nested_circle_arc_elt(Geom* g, int idx);
 extern "C" int g_nested_circle_arc_len(Geom* g);
 extern "C" int   g_nested_circle_arc_len(Geom* g);
@@ -150,6 +159,7 @@ extern "C" Geom* g_nested_circle_arc_open_offset(float d, Geom* p);
 extern "C" Geom* g_nested_circle_arc_closed_offset(float d, Geom* p);
 extern "C" Geom* g_nested_circle_arc_discretize(float max_deviation, int is_closed, Geom* p);
 extern "C" Geom* g_nested_circle_arc_union(Geom* a, Geom* b);
+extern "C" Geom* g_nested_circle_arc_union1(Geom* a);
 extern "C" Geom* g_nested_circle_arc_intersection(Geom* a, Geom* b);
 extern "C" Geom* g_nested_circle_arc_intersection1(Geom* a);
 extern "C" Geom* g_nested_circle_arc_concat(Geom* a, Geom* b);

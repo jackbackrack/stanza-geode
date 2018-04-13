@@ -11,10 +11,12 @@ void error (std::string msg, std::string arg) {
 }
 
 void ensure (bool val, std::string msg) {
-  if (!val) error(msg);
+  if (!val)
+    error(msg);
 }
 
 Geom* g_v2d(TV2 v) { return new V2dGeom(v); }
+void g_v2d_delete(Geom* g) { delete g; }
 Geom* g_array_v2d(Array<TV2> line) { return new ArrayV2dGeom(line); }
 Geom* g_array_v2d(RawArray<TV2> line) { return g_array_v2d(line.copy()); }
 
@@ -30,6 +32,7 @@ std::vector<Geom*> g_args_val(Geom* g) {
   return ((ArgsGeom*)g)->val;
 }
 Geom* g_args_fab(void) { return new ArgsGeom(); }
+void g_args_delete(Geom* g) { delete ((ArgsGeom*)g); }
 Geom* g_args_add(Geom* g, Geom* e) {
   ((ArgsGeom*)g)->val.push_back(e);
   return g;
@@ -50,6 +53,7 @@ Geom* g_array_v2d_fab(Geom* args) {
     v.append(g_v2d_val(arg));
   return g_array_v2d(v);
 }
+void g_array_v2d_delete(Geom* g) { delete ((ArrayV2dGeom*)g); }
 Geom* g_array_v2d_elt(Geom* g, int idx) { return g_v2d(g_array_v2d_val(g)[idx]); }
 int g_array_v2d_len(Geom* g) { return g_array_v2d_val(g).size(); }
 
@@ -59,6 +63,7 @@ Geom* g_circle_arc_fab(float x, float y, float q) {
   // printf("%p = [%f, %f, %f]\n", res, x, y, z);
   return res;
 }
+void g_circle_arc_delete(Geom* g) { delete ((CircleArcGeom*)g); }
 Geom* g_array_circle_arc_elt(Geom* g, int idx) { return g_circle_arc(g_array_circle_arc_val(g)[idx]); }
 int g_array_circle_arc_len(Geom* g) { return g_array_circle_arc_val(g).size(); }
 CircleArc g_circle_arc_val(Geom* g) {
@@ -89,6 +94,7 @@ Geom* g_nested_circle_arc_fab(Geom* args) {
   v.freeze();
   return g_nested_circle_arc(v);
 }
+void g_nested_circle_arc_delete(Geom* g) { delete ((NestedCircleArcGeom*)g); }
 Geom* g_nested_circle_arc(Nested<TV2> args) {
   Nested<CircleArc, false> v;
   for (auto arg : args) 
@@ -116,6 +122,7 @@ Nested<TV2> g_nested_v2d_val(Geom* g) {
   else
     return ((NestedV2dGeom*)g)->val;
 }
+void g_nested_v2d_delete(Geom* g) { delete g; }
 Geom* g_nested_v2d_elt(Geom* g, int idx) { return g_array_v2d(g_nested_v2d_val(g)[idx]); }
 int g_nested_v2d_len(Geom* g) { return g_nested_v2d_val(g).size(); }
 
@@ -130,6 +137,7 @@ Geom* g_array_circle_arc_fab(Geom* args) {
     v.append(g_circle_arc_val(arg));
   return g_array_circle_arc(v);
 }
+void g_array_circle_arc_delete(Geom* g) { delete ((ArrayCircleArcGeom*)g); }
 Geom* g_nested_circle_arc_elt(Geom* g, int idx) { return g_array_circle_arc(g_nested_circle_arc_val(g)[idx]); }
 int g_nested_circle_arc_len(Geom* g) { return g_nested_circle_arc_val(g).size(); }
 
@@ -158,10 +166,12 @@ Geom* g_nested_circle_arc_find_overlapping_offsets(float d, Geom* a) {
   return new NestedCircleArcGeom(find_overlapping_offsets(g_nested_circle_arc_val(a), d));
 }
 Geom* g_nested_circle_arc_intersection(Geom* a, Geom* b) {
-  return new NestedCircleArcGeom(circle_arc_intersection(g_nested_circle_arc_val(a), g_nested_circle_arc_val(b)));
+  auto i = circle_arc_intersection(g_nested_circle_arc_val(a), g_nested_circle_arc_val(b));
+  return new NestedCircleArcGeom(i);
 }
 Geom* g_nested_circle_arc_intersection1(Geom* a) {
-  return new NestedCircleArcGeom(circle_arc_intersection(g_nested_circle_arc_val(a)));
+  auto i = circle_arc_intersection(g_nested_circle_arc_val(a));
+  return new NestedCircleArcGeom(i);
 }
 static Nested<CircleArc> circle_arc_concat_all(std::vector<Nested<CircleArc>> arcz) {
   Nested<CircleArc,false> res;
@@ -200,20 +210,30 @@ static Nested<CircleArc> nested_circle_arc_not (Nested<CircleArc> ca) {
   return res;
 }
 Geom* g_nested_circle_arc_difference(Geom* a, Geom* b) {
-  return new NestedCircleArcGeom(circle_arc_union(g_nested_circle_arc_val(a), nested_circle_arc_not(g_nested_circle_arc_val(b))));
+  auto r = circle_arc_union(g_nested_circle_arc_val(a), nested_circle_arc_not(g_nested_circle_arc_val(b)));
+  return new NestedCircleArcGeom(r);
 }
 Geom* g_nested_circle_arc_not(Geom* a) {
-  return new NestedCircleArcGeom(nested_circle_arc_not(g_nested_circle_arc_val(a)));
+  auto r = nested_circle_arc_not(g_nested_circle_arc_val(a));
+  return new NestedCircleArcGeom(r);
 }
 Geom* g_nested_circle_arc_union(Geom* a, Geom* b) {
-  return new NestedCircleArcGeom(circle_arc_union(g_nested_circle_arc_val(a), g_nested_circle_arc_val(b)));
+  auto r = circle_arc_union(g_nested_circle_arc_val(a), g_nested_circle_arc_val(b));
+  return new NestedCircleArcGeom(r);
+}
+Geom* g_nested_circle_arc_union1(Geom* a) {
+  auto u = circle_arc_union(g_nested_circle_arc_val(a));
+  return new NestedCircleArcGeom(u);
 }
 Geom* g_nested_circle_arc_open_offset(float r, Geom* g) {
-  return new NestedCircleArcGeom(offset_open_arcs(g_nested_circle_arc_val(g), r));
+  auto o = offset_open_arcs(g_nested_circle_arc_val(g), r);
+  return new NestedCircleArcGeom(o);
 }
 Geom* g_nested_circle_arc_closed_offset(float r, Geom* g) {
-  return new NestedCircleArcGeom(offset_arcs(g_nested_circle_arc_val(g), r));
+  auto o = offset_arcs(g_nested_circle_arc_val(g), r);
+  return new NestedCircleArcGeom(o);
 }
 Geom* g_nested_circle_arc_discretize(float max_deviation, int is_closed, Geom* g) {
-  return new NestedV2dGeom(discretize_nested_arcs(g_nested_circle_arc_val(g), is_closed, max_deviation));
+  auto d = discretize_nested_arcs(g_nested_circle_arc_val(g), is_closed, max_deviation);
+  return new NestedV2dGeom(d);
 }
