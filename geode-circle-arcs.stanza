@@ -237,6 +237,10 @@ public lostanza defn to-polyline2f (v:ref<g-nested-circle-arc>, max-deviation:re
 public lostanza defn to-polygon (v:ref<g-nested-circle-arc>, max-deviation:ref<Float>) -> ref<Polygon> :
   return to-polygon(to-polyline2f(v, max-deviation))
 
+public defn to-g-simple-nested-circle-arcs (a:g-nested-circle-arc) -> Seq<g-nested-circle-arc> :
+  for i in 0 to g-nested-circle-arc-len(a) seq :
+    to-g-nested-circle-arc $ g-nested-circle-arc-elt(a, i)
+
 public lostanza defn to-g-nested-circle-arc (a:ref<g-array-circle-arc>) -> ref<g-nested-circle-arc> :
   val args = call-c g_args_fab()
   call-c g_args_add(args, a.value)
