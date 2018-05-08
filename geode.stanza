@@ -5,13 +5,6 @@ defpackage geode :
   import utils
   import geom
 
-public deftype Shape <: AnyShape
-
-public defn shapes (any-shapes:Seqable<AnyShape>) -> Seqable<Shape> :
-  generate<Shape> : for e in any-shapes do : yield(e as Shape) when e is Shape
-
-public defn shapes (p:Poseable) : shapes(any-shapes(p))
-
 deftype g_any <: Geom
   
 lostanza deftype g_args :
@@ -682,7 +675,6 @@ public defn extrude (h:Float) : extrude{h, _}
 ;;   val caps = for [v0, v1] in segments seq : f(v0, v1, d)
 ;;   reduce(fn (a:Shape, b:Shape): a | b, caps)
 
-public var *resolution* = 8.0f
 public var *render-offset* = 16.0f
 
 public deftype Glue <: ShapeGlue&Shape

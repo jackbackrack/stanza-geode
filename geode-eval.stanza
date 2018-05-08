@@ -10,7 +10,7 @@ defpackage geode-eval :
    import font
    import eval-geode-repl
 
-public defn shape-eval (e) :
+public defmethod shape-eval (e) :
   match(e) :
     (g:Geom) : g
     (o) :      Msg(to-string(o))
