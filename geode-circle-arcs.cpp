@@ -170,7 +170,7 @@ Geom* g_nested_circle_arc_intersection(Geom* a, Geom* b) {
   return new NestedCircleArcGeom(i);
 }
 Geom* g_nested_circle_arc_intersection1(Geom* a) {
-  auto i = split_circle_arcs(g_nested_circle_arc_val(a), g_nested_circle_arc_len(a) - 1);
+  auto i = split_circle_arcs(g_nested_circle_arc_val(a), 1);
   return new NestedCircleArcGeom(i);
 }
 static Nested<CircleArc> circle_arc_concat_all(std::vector<Nested<CircleArc>> arcz) {
