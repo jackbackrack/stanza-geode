@@ -11,7 +11,3 @@ defregistry stanza-geode :
       link Darwin ["${GEN}/cad.a" "-lgeode" "-lc++" "-framework OpenGL"]
       link GNU/Linux ["${GEN}/cad.a" "-lgeode" "-lstdc++" "-lGLU"]
   file "geode-gfx.stanza"
-  file "geode-eval.stanza"
-  file "geode-repl.stanza"
-  file "eval-geode-repl.stanza" gen :
-    package eval-geode-repl
