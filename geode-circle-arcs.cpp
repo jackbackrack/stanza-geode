@@ -1,3 +1,5 @@
+// See license.txt for details about licensing.
+
 #include "geode-circle-arcs.h"
 
 void error (std::string msg) {

@@ -1,3 +1,5 @@
+;; See license.txt for details about licensing.
+
 defpackage geode-circle-arcs :
   import core
   import math

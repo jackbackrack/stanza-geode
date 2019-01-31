@@ -1,3 +1,5 @@
+// See license.txt for details about licensing.
+
 #ifndef __IS_CIRCLE_ARCS__
 #define __IS_CIRCLE_ARCS__
 
