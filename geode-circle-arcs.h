@@ -131,10 +131,12 @@ extern std::vector<Geom*> g_args_val(Geom* g);
 extern "C" Geom* g_v2d_fab(float x, float y);
 extern "C" void g_v2d_delete(Geom* g);
 
+extern "C" Geom* g_array_v2d_fab(Geom* args);
 extern "C" void g_array_v2d_delete(Geom *g);
 extern "C" Geom* g_array_v2d_elt(Geom* g, int idx);
 extern "C" int g_array_v2d_len(Geom* g);
 
+extern "C" Geom* g_nested_v2d_fab(Geom* args);
 extern "C" void g_nested_v2d_delete(Geom *g);
 extern "C" Geom* g_nested_v2d_elt(Geom* g, int idx);
 extern "C" int g_nested_v2d_len(Geom* g);

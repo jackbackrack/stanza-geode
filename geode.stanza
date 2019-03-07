@@ -568,7 +568,7 @@ public defmethod clone (s:Shape, name:Symbol, color:V4f, points:Tuple<V3f>, tags
 public defn Shape (m:g-mesh) : Shape(m, false, WHITE, [], [])
 
 public defn Shape (s:Shape, bounds:Box3f) :
-  Shape(mesh(s), name(s), color(s), tags(s), points(s))
+  Shape(mesh(s), name(s), color(s), tags(s), poses(s))
 
 ;;; 3D API
 
