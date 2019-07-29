@@ -6,68 +6,50 @@ defpackage geode-circle-arcs :
   import collections
   import geom
 
-val FINALIZERS = Vector<LivenessTracker<(() -> ?)>>()
-val PENDING-FINALIZERS = Vector<LivenessTracker<(() -> ?)>>()
-  
-;; add-gc-notifier $ fn () :
-;;   add-all(FINALIZERS, PENDING-FINALIZERS)
-;;   clear(PENDING-FINALIZERS)
-;;   println(">>> GC NOTIFICATION %_" % [length(FINALIZERS)])
-;;   for f in FINALIZERS remove-when :
-;;     if marker(f) is False :
-;;       value(f)()
-;;       true
-
-public defn finalized-marker (f: () -> ?) -> LivenessMarker :
-  val t = LivenessTracker(f)
-  add(PENDING-FINALIZERS, t)
-  marker!(t)
-
-lostanza deftype Deleter :
+lostanza deftype Deleter <: Finalizer :
   f: ptr<(ptr<?> -> int)>
   ptr: ptr<?>
-lostanza defn execute (d:ref<Deleter>) -> ref<False> :
+
+lostanza defmethod run (d:ref<Deleter>) -> ref<False> :
   call-c [d.f](d.ptr)
   return false
-defn deletion-marker (d:Deleter) :
-  finalized-marker(execute{d})
 
 deftype g_any <: Geom
   
 lostanza deftype g_args :
   kind: int
   
-public lostanza deftype g-args :
+public lostanza deftype g-args <: Unique :
   value: ptr<g_args>
-  marker: ref<LivenessMarker>
   
 lostanza defn g-args (ptr:ptr<g_args>) -> ref<g-args> :
-  val mkr = deletion-marker(new Deleter{addr(g_args_delete), ptr})
-  return new g-args{ptr, mkr}
+  val x = new g-args{ptr}
+  add-finalizer(new Deleter{addr(g_args_delete), ptr}, x)
+  return x
 
 lostanza deftype g_v2d :
   kind : int
   x : double
   y : double
 
-public lostanza deftype g-v2d <: g_any :
+public lostanza deftype g-v2d <: g_any & Unique :
   value: ptr<g_v2d>
-  marker: ref<LivenessMarker>
   
 lostanza defn g-v2d (ptr:ptr<g_v2d>) -> ref<g-v2d> :
-  val mkr = deletion-marker(new Deleter{addr(g_v2d_delete), ptr})
-  return new g-v2d{ptr, mkr}
+  val x = new g-v2d{ptr}
+  add-finalizer(new Deleter{addr(g_v2d_delete), ptr}, x)
+  return x
 
 lostanza deftype g_array_v2d :
   kind : int
 
-public lostanza deftype g-array-v2d <: g_any :
+public lostanza deftype g-array-v2d <: g_any & Unique :
   value: ptr<g_array_v2d>
-  marker: ref<LivenessMarker>
 
 lostanza defn g-array-v2d (ptr:ptr<g_array_v2d>) -> ref<g-array-v2d> :
-  val mkr = deletion-marker(new Deleter{addr(g_array_v2d_delete), ptr})
-  return new g-array-v2d{ptr, mkr}
+  val x = new g-array-v2d{ptr}
+  add-finalizer(new Deleter{addr(g_array_v2d_delete), ptr}, x)
+  return x
 
 defmethod print (s:OutputStream, o:g-array-v2d) :
   print-all(s, ["G-Array-V2d()"])
@@ -75,13 +57,13 @@ defmethod print (s:OutputStream, o:g-array-v2d) :
 lostanza deftype g_nested_v2d :
   kind : int
 
-public lostanza deftype g-nested-v2d <: g_any :
+public lostanza deftype g-nested-v2d <: g_any & Unique :
   value: ptr<g_nested_v2d>
-  marker: ref<LivenessMarker>
 
 lostanza defn g-nested-v2d (ptr:ptr<g_nested_v2d>) -> ref<g-nested-v2d> :
-  val mkr = deletion-marker(new Deleter{addr(g_nested_v2d_delete), ptr})
-  return new g-nested-v2d{ptr, mkr}
+  val x = new g-nested-v2d{ptr}
+  add-finalizer(new Deleter{addr(g_nested_v2d_delete), ptr}, x)
+  return x
 
 defmethod print (s:OutputStream, o:g-nested-v2d) :
   print-all(s, ["G-Nested-V2d()"])
@@ -92,24 +74,24 @@ lostanza deftype g_circle_arc :
   y : double
   q : double
 
-public lostanza deftype g-circle-arc <: g_any :
+public lostanza deftype g-circle-arc <: g_any & Unique :
   value: ptr<g_circle_arc>
-  marker: ref<LivenessMarker>
   
 lostanza defn g-circle-arc (ptr:ptr<g_circle_arc>) -> ref<g-circle-arc> :
-  val mkr = deletion-marker(new Deleter{addr(g_circle_arc_delete), ptr})
-  return new g-circle-arc{ptr, mkr}
+  val x = new g-circle-arc{ptr}
+  add-finalizer(new Deleter{addr(g_circle_arc_delete), ptr}, x)
+  return x
 
 lostanza deftype g_array_circle_arc :
   kind : int
 
-public lostanza deftype g-array-circle-arc <: g_any :
+public lostanza deftype g-array-circle-arc <: g_any & Unique :
   value: ptr<g_array_circle_arc>
-  marker: ref<LivenessMarker>
 
 lostanza defn g-array-circle-arc (ptr:ptr<g_array_circle_arc>) -> ref<g-array-circle-arc> :
-  val mkr = deletion-marker(new Deleter{addr(g_array_circle_arc_delete), ptr})
-  return new g-array-circle-arc{ptr, mkr}
+  val x = new g-array-circle-arc{ptr}
+  add-finalizer(new Deleter{addr(g_array_circle_arc_delete), ptr}, x)
+  return x
 
 defmethod print (s:OutputStream, o:g-array-circle-arc) :
   print-all(s, ["G-Array-Circle-Arc()"])
@@ -117,13 +99,13 @@ defmethod print (s:OutputStream, o:g-array-circle-arc) :
 lostanza deftype g_nested_circle_arc :
   kind : int
 
-public lostanza deftype g-nested-circle-arc <: g_any :
+public lostanza deftype g-nested-circle-arc <: g_any & Unique :
   value: ptr<g_nested_circle_arc>
-  marker: ref<LivenessMarker>
 
 lostanza defn g-nested-circle-arc (ptr:ptr<g_nested_circle_arc>) -> ref<g-nested-circle-arc> :
-  val mkr = deletion-marker(new Deleter{addr(g_nested_circle_arc_delete), ptr})
-  return new g-nested-circle-arc{ptr, mkr}
+  val x = new g-nested-circle-arc{ptr}
+  add-finalizer(new Deleter{addr(g_nested_circle_arc_delete), ptr}, x)
+  return x
 
 defmethod print (s:OutputStream, o:g-nested-circle-arc) :
   print-all(s, ["G-Nested-Circle-Arc()"])
@@ -132,7 +114,7 @@ extern g_args_fab: () -> ptr<g_args>
 extern g_args_delete: (ptr<g_args>) -> int
 extern g_args_add: (ptr<g_args>, ptr<?>) -> ptr<g_args>
 
-extern g_v2d_fab: (float, float) -> ptr<g_v2d>
+;extern g_v2d_fab: (float, float) -> ptr<g_v2d>
 extern g_v2d_delete: (ptr<g_v2d>) -> int
 
 extern g_array_v2d_fab: (ptr<g_args>) -> ptr<g_array_v2d>
@@ -140,7 +122,7 @@ extern g_array_v2d_delete: (ptr<g_args>) -> int
 extern g_array_v2d_elt: (ptr<g_array_v2d>, int) -> ptr<g_v2d>
 extern g_array_v2d_len: (ptr<g_array_v2d>) -> int
 
-extern g_nested_v2d_fab: (ptr<g_args>) -> ptr<g_nested_v2d>
+;extern g_nested_v2d_fab: (ptr<g_args>) -> ptr<g_nested_v2d>
 extern g_nested_v2d_delete: (ptr<g_args>) -> int
 extern g_nested_v2d_elt: (ptr<g_nested_v2d>, int) -> ptr<g_array_v2d>
 extern g_nested_v2d_len: (ptr<g_nested_v2d>) -> int
