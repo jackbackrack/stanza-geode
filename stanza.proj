@@ -1,0 +1,16 @@
+package geode defined-in "geode.stanza"
+package geode requires :
+  ccflags :
+    on-platform :
+      os-x  : ("{GEN}/cad.a" "-framework OpenGL" "-lgeode" "-lc++")
+      linux : ("{GEN}/cad.a" "-lGLU" "-lgeode" "-lstdc++")
+package geode-gfx defined-in "geode-gfx.stanza"
+package geode-circle-arcs defined-in "geode-circle-arcs.stanza"
+package geode-circle-arcs requires :
+  ccfiles : "{GEN}/geode-circle-arcs.o"
+  ccflags :
+    on-platform :
+      os-x  : ("-framework OpenGL" "-lgeode" "-lc++")
+      linux : ("-lGLU" "-lgeode" "-lstdc++")
+compile file "{GEN}/geode-circle-arcs.o" from "geode-circle-arcs.cpp" :
+  "g++ -std=c++11 -I/usr/local/include/geode -c {.}/geode-circle-arcs.cpp -o {GEN}/geode-circle-arcs.o"
