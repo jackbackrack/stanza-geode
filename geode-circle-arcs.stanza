@@ -4,7 +4,7 @@ defpackage geode-circle-arcs :
   import core
   import math
   import collections
-  import geom
+  import geom/vec
 
 lostanza deftype Deleter <: Finalizer :
   f: ptr<(ptr<?> -> int)>
