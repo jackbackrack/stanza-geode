@@ -1,14 +1,14 @@
-package geode defined-in "geode.stanza"
-package geode requires :
+package geode/core defined-in "geode.stanza"
+package geode/core requires :
   ccfiles :
     "{WORKDIR}/build/cad.a"
   ccflags :
     on-platform :
       os-x  : ("-framework OpenGL" "-lgeode" "-lc++")
       linux : ("-lGLU" "-lgeode" "-lstdc++")
-package geode-gfx defined-in "geode-gfx.stanza"
-package geode-circle-arcs defined-in "geode-circle-arcs.stanza"
-package geode-circle-arcs requires :
+package geode/gfx defined-in "geode-gfx.stanza"
+package geode/circle-arcs defined-in "geode-circle-arcs.stanza"
+package geode/circle-arcs requires :
   ccfiles : "{WORKDIR}/build/geode-circle-arcs.o"
   ccflags :
     on-platform :

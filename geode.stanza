@@ -5,7 +5,18 @@ defpackage geode :
   import math
   import collections
   import utils
-  import geom
+  import geom/geom
+  import geom/angle
+  import geom/mat
+  import geom/vec
+  import geom/box
+  import geom/polygon
+  import geom/polyline
+  import geom/shape
+  import geom/bounded
+  import geom/poseable
+  import geom/space
+  import geom/assembly
 
 deftype g_any <: Geom
   

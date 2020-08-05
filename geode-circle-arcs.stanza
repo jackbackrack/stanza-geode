@@ -1,10 +1,13 @@
 ;; See license.txt for details about licensing.
 
-defpackage geode-circle-arcs :
+defpackage geode/circle-arcs :
   import core
   import math
   import collections
+  import geom/geom
   import geom/vec
+  import geom/polyline
+  import geom/polygon
 
 lostanza deftype Deleter <: Finalizer :
   f: ptr<(ptr<?> -> int)>
