@@ -1,0 +1,6 @@
+name = "stanza-geode"
+version = "0.1.0"
+[dependencies]
+stanza-utils = "jackbackrack/stanza-utils|0.1.0"
+stanza-geom = "jackbackrack/stanza-geom|0.1.1"
+stanza-gfx = "jackbackrack/stanza-gfx|0.1.1"
